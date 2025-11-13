@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { loadCheckInState } from '../lib/checkInState';
 
 const BASE_PROMPTS = [
   'Which wine or cocktail always reminds you of a special memory, and what’s the story behind it?',
@@ -114,11 +115,42 @@ const BASE_PROMPTS = [
 function IcebreakerDeck() {
   const navigate = useNavigate();
   const location = useLocation();
-  const attendeeName = location.state?.name || 'Guest';
-  const attendeeLocation = location.state?.location;
+  const [attendee, setAttendee] = useState(() => {
+    if (location.state?.name) {
+      return location.state;
+    }
+    return loadCheckInState();
+  });
+
+  useEffect(() => {
+    if (location.state?.name) {
+      setAttendee(location.state);
+      return;
+    }
+
+    const stored = loadCheckInState();
+    if (stored) {
+      setAttendee(stored);
+    } else {
+      navigate('/', { replace: true });
+    }
+  }, [location.state, navigate]);
+
+  const attendeeName = attendee?.name || 'Guest';
+  const attendeeLocation = attendee?.location;
 
   const [deck, setDeck] = useState(() => shuffle([...BASE_PROMPTS]));
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAdvancing, setIsAdvancing] = useState(false);
+  const advanceTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (advanceTimeoutRef.current) {
+        clearTimeout(advanceTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const visibleCards = useMemo(() => {
     if (deck.length === 0) {
@@ -128,12 +160,15 @@ function IcebreakerDeck() {
   }, [deck, currentIndex]);
 
   const handleNextCard = () => {
-    setCurrentIndex((prev) => (prev + 1) % deck.length);
-  };
+    if (deck.length === 0 || isAdvancing) {
+      return;
+    }
 
-  const handleShuffleDeck = () => {
-    setDeck((prevDeck) => shuffle([...prevDeck]));
-    setCurrentIndex(0);
+    setIsAdvancing(true);
+    advanceTimeoutRef.current = setTimeout(() => {
+      setCurrentIndex((prev) => (prev + 1) % deck.length);
+      setIsAdvancing(false);
+    }, 320);
   };
 
   return (
@@ -147,7 +182,7 @@ function IcebreakerDeck() {
             Spark the conversation.
           </h1>
           <p className="max-w-2xl text-sm text-slate-300 sm:text-base md:text-lg">
-            Hand-curated prompts designed to help guests connect with ease. Each card offers a fresh way to get to know the people around you.
+            Use these hand-curated prompts based on the people at your table to connect with ease. Each card offers a fresh way to get to know the people around you.
           </p>
         </header>
 
@@ -156,7 +191,9 @@ function IcebreakerDeck() {
             className="absolute inset-0 -translate-y-10 translate-x-4 rounded-[34px] bg-sky-500/25 blur-3xl sm:-translate-y-12 sm:translate-x-6 sm:rounded-[40px]"
             aria-hidden
           />
-          <div className="relative flex flex-col gap-8 rounded-[28px] border border-white/10 bg-slate-900 px-6 py-8 shadow-2xl shadow-sky-900/60 sm:gap-10 sm:rounded-[32px] sm:px-8 sm:py-10 md:flex-row md:items-center md:justify-between md:px-12 md:py-12">
+          <div
+            className={`relative flex flex-col gap-8 rounded-[28px] border border-white/10 bg-slate-900 px-6 py-8 shadow-2xl shadow-sky-900/60 transition-transform duration-500 sm:gap-10 sm:rounded-[32px] sm:px-8 sm:py-10 md:flex-row md:items-center md:justify-between md:px-12 md:py-12 ${isAdvancing ? 'card-shuffle' : ''}`}
+          >
             <div className="relative flex h-[270px] w-full flex-col items-center justify-center sm:h-[330px] md:h-[390px] md:w-2/3">
               {visibleCards.map((prompt, index) => {
                 const rotation = index === 0 ? 'rotate-0' : index === 1 ? '-rotate-1.5' : 'rotate-1.5';
@@ -183,7 +220,6 @@ function IcebreakerDeck() {
                       {prompt}
                     </p>
                     <div className="flex items-center justify-between text-[0.7rem] text-slate-500 sm:text-xs md:text-sm">
-                      <span>Swipe to explore more</span>
                       <span>Deck of {deck.length}</span>
                     </div>
                   </article>
@@ -198,13 +234,6 @@ function IcebreakerDeck() {
                 className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-sky-400 via-indigo-400 to-purple-500 px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-sky-500/25 transition hover:scale-[1.01] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-sky-300 focus-visible:ring-offset-slate-900 sm:text-base"
               >
                 Reveal next prompt
-              </button>
-              <button
-                type="button"
-                onClick={handleShuffleDeck}
-                className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-900/40 transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/80 focus-visible:ring-offset-slate-900 sm:text-base"
-              >
-                Shuffle deck
               </button>
             </div>
           </div>

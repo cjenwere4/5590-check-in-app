@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getSupabaseClient } from '../lib/supabaseClient';
+import { persistCheckInState } from '../lib/checkInState';
 
 function CheckInPage() {
   const [name, setName] = useState('');
@@ -158,12 +159,18 @@ function CheckInPage() {
       console.warn('Supabase configuration missing; skipping remote logging.');
     }
 
+    const attendeeState = {
+      name: trimmedName,
+      location,
+      checkInLogged,
+      capturedAt,
+      sessionId,
+    };
+
+    persistCheckInState(attendeeState);
+
     navigate('/icebreakers', {
-      state: {
-        name: trimmedName,
-        location,
-        checkInLogged,
-      },
+      state: attendeeState,
     });
   };
 
