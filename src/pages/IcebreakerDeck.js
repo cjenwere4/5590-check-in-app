@@ -179,12 +179,34 @@ function IcebreakerDeck() {
             Icebreaker Lounge
           </p>
           <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-5xl">
-            Spark the conversation.
+            You're checked in! Use the prompt cards to help break the ice.
           </h1>
-          <p className="max-w-2xl text-sm text-slate-300 sm:text-base md:text-lg">
-            Use these hand-curated prompts based on the people at your table to connect with ease. Each card offers a fresh way to get to know the people around you.
-          </p>
         </header>
+
+        <div className="relative">
+          <div
+            className="absolute inset-0 -translate-y-10 translate-x-4 rounded-[34px] bg-purple-500/20 blur-3xl sm:-translate-y-12 sm:translate-x-6 sm:rounded-[40px]"
+            aria-hidden
+          />
+          <div className="relative rounded-[28px] border border-white/10 bg-slate-900 px-6 py-8 shadow-2xl shadow-purple-900/40 sm:rounded-[32px] sm:px-8 sm:py-10 md:px-12 md:py-12">
+            <div className="flex flex-col items-center gap-4 text-center sm:gap-6">
+              <h2 className="text-xl font-semibold text-white sm:text-2xl md:text-3xl">
+                Share Your Event Photos
+              </h2>
+              <p className="max-w-2xl text-sm text-slate-300 sm:text-base md:text-lg">
+                Capture the memories! Upload pictures from the event to help preserve these special moments.
+              </p>
+              <a
+                href="https://app.kululu.com/upload/w9p97x"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-purple-400 via-pink-400 to-rose-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/25 transition hover:scale-[1.01] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-purple-300 focus-visible:ring-offset-slate-900 sm:text-base"
+              >
+                Upload Photos
+              </a>
+            </div>
+          </div>
+        </div>
 
         <div className="relative">
           <div
