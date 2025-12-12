@@ -143,6 +143,7 @@ function IcebreakerDeck() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAdvancing, setIsAdvancing] = useState(false);
   const advanceTimeoutRef = useRef(null);
+  const photosDivRef = useRef(null);
 
   useEffect(() => {
     return () => {
@@ -150,6 +151,13 @@ function IcebreakerDeck() {
         clearTimeout(advanceTimeoutRef.current);
       }
     };
+  }, []);
+
+  useEffect(() => {
+    // Scroll to photos div when component mounts
+    if (photosDivRef.current) {
+      photosDivRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }, []);
 
   const visibleCards = useMemo(() => {
@@ -183,7 +191,7 @@ function IcebreakerDeck() {
           </h1>
         </header>
 
-        <div className="relative">
+        <div ref={photosDivRef} className="relative">
           <div
             className="absolute inset-0 -translate-y-10 translate-x-4 rounded-[34px] bg-purple-500/20 blur-3xl sm:-translate-y-12 sm:translate-x-6 sm:rounded-[40px]"
             aria-hidden
